@@ -279,6 +279,7 @@ HOOK-VAR is a quoted hook.
 TRIGGER-HOOK is a list of quoted hooks and/or sharp-quoted functions."
   (dolist (hook trigger-hooks)
     (let ((fn (make-symbol (format "chain-%s-to-%s-h" hook-var hook)))
+          (backup (intern (format "%s--transient-backup" hook-var)))
           running?)
       (fset
        fn (lambda (&rest _)
@@ -295,6 +296,7 @@ TRIGGER-HOOK is a list of quoted hooks and/or sharp-quoted functions."
                                 (symbol-value hook))))
               (setq running? t)  ; prevent infinite recursion
               (doom-run-hooks hook-var)
+              (set backup (symbol-value hook-var))
               (set hook-var nil))))
       (when (daemonp)
         ;; In a daemon session we don't need all these lazy loading shenanigans.
